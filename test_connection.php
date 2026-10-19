@@ -11,3 +11,5 @@ echo 'Conexión correcta con: '
         ENT_QUOTES,
         'UTF-8'
     );
+
+    /* https://chatgpt.com/c/69af8bb7-bcf4-8325-a66c-e817eb9b260f */

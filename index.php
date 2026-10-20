@@ -61,7 +61,21 @@
           ☰
         </button>
         <div class="breadcrumb">Workspace / <strong>Dashboard</strong></div>
-        <span class="status"><span></span> Vista de demostración</span>        
+        <!-- <span class="status"><span></span> Vista de demostración</span> -->
+        <!-- Usuario -->
+        <p>
+          Bienvenido,
+          <?= e($_SESSION['user_name'] ?? 'Usuario') ?>
+        </p>
+        
+        <form action="logout.php" method="POST">
+          <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+          <button type="submit" class="button-secondary">
+            Cerrar sesión
+          </button>
+        </form>
+         <!-- fin -->
+
       </header>
 
       <section class="page-content">

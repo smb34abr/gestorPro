@@ -7,7 +7,9 @@ require_once __DIR__ . '/config/database.php';
 
 // Usuario de demostración.
 // Sustituiremos este valor por el ID de la sesión al implementar login.
-$demoOwnerId = 1;
+
+/* $demoOwnerId = 1; */
+$currentUserId = requireLogin();
 
 $stmt = $pdo->prepare(
     'SELECT
@@ -28,7 +30,7 @@ $stmt = $pdo->prepare(
      ORDER BY p.created_at DESC'
 );
 
-$stmt->execute(['owner_id' => $demoOwnerId]);
+$stmt->execute(['owner_id' => $currentUserId]); /* $demoOwnerId */
 $projects = $stmt->fetchAll();
 
 $statusLabels = [
@@ -126,7 +128,7 @@ unset($_SESSION['flash_message']);
         <?php endif; ?>
 
         <p style="margin-top: 24px">
-            <a href="index.html">Volver al dashboard de demostración</a>
+            <a href="index.php">Volver al dashboard de demostración</a>
         </p>
     </section>
 </main>

@@ -4,7 +4,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/config/functions.php';
 require_once __DIR__ . '/config/database.php';
 
-$demoOwnerId = 1;
+/* $demoOwnerId = 1; */
+$currentUserId = requireLogin();
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
@@ -21,7 +22,7 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([
     'id' => $id,
-    'owner_id' => $demoOwnerId,
+    'owner_id' => $currentUserId, /* $demoOwnerId, */
 ]);
 
 $task = $stmt->fetch();
@@ -43,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $deleteStmt->execute([
         'id' => $id,
-        'owner_id' => $demoOwnerId,
+        'owner_id' => $currentUserId, /* $demoOwnerId, */
     ]);
 
     if ($deleteStmt->rowCount() !== 1) {

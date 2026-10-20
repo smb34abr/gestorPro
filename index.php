@@ -1,6 +1,12 @@
+<?php
+  declare(strict_types=1);
+  require_once __DIR__ . '/config/functions.php';
+  $currentUserId = requireLogin();
+?>
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
   <meta charset="UTF-8">
@@ -10,6 +16,7 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/app.js" defer></script>
 </head>
+
 <body>
   <div class="app">
 
@@ -28,7 +35,7 @@
         <a class="nav-link" href="projects.php"> <!-- #proyectos -->
           <span>▣</span> Proyectos
         </a>
-        <a class="nav-link" href="#tareas">
+        <a class="nav-link" href="tasks.php">
           <span>✓</span> Tareas
         </a>
         <a class="nav-link" href="#equipo">
@@ -50,12 +57,11 @@
 
     <main class="main-content" id="inicio">
       <header class="topbar">
-        <button class="menu-toggle" id="menuToggle"
-          aria-label="Abrir o cerrar menú" aria-expanded="false">
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir o cerrar menú" aria-expanded="false">
           ☰
         </button>
         <div class="breadcrumb">Workspace / <strong>Dashboard</strong></div>
-        <span class="status"><span></span> Vista de demostración</span>
+        <span class="status"><span></span> Vista de demostración</span>        
       </header>
 
       <section class="page-content">
@@ -118,8 +124,7 @@
               <h2>Proyectos recientes</h2>
               <p>Seguimiento de tus proyectos activos.</p>
             </div>
-            <button class="button button-secondary"
-              id="viewProjects">Ver proyectos</button>
+            <button class="button button-secondary" id="viewProjects">Ver proyectos</button>
           </div>
 
           <div class="project-grid">
@@ -172,8 +177,7 @@
             </div>
             <label class="search-box">
               <span aria-hidden="true">⌕</span>
-              <input id="taskSearch" type="search"
-                placeholder="Buscar tarea..." aria-label="Buscar tarea">
+              <input id="taskSearch" type="search" placeholder="Buscar tarea..." aria-label="Buscar tarea">
             </label>
           </div>
 
@@ -231,4 +235,5 @@
     </main>
   </div>
 </body>
+
 </html>

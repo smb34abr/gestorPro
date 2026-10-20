@@ -1,11 +1,12 @@
-
 <?php
+
 declare(strict_types=1);
 
 require_once __DIR__ . '/config/functions.php';
 require_once __DIR__ . '/config/database.php';
 
-$demoOwnerId = 1;
+/* $demoOwnerId = 1; */
+$currentUserId = requireLogin();
 
 $statuses = [
     'pending' => 'Pendiente',
@@ -50,7 +51,7 @@ if ($isEditing) {
     ");
     $stmt->execute([
         'id' => $id,
-        'owner_id' => $demoOwnerId,
+        'owner_id' => $currentUserId, /* $demoOwnerId, */
     ]);
 
     $existingTask = $stmt->fetch();
@@ -69,7 +70,7 @@ $projectStmt = $pdo->prepare("
     WHERE owner_id = :owner_id
     ORDER BY name
 ");
-$projectStmt->execute(['owner_id' => $demoOwnerId]);
+$projectStmt->execute(['owner_id' => $currentUserId]); /* $demoOwnerId */
 $projects = $projectStmt->fetchAll();
 
 $userStmt = $pdo->query("
@@ -114,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $checkProject->execute([
             'id' => $projectId,
-            'owner_id' => $demoOwnerId,
+            'owner_id' => $currentUserId, /* $demoOwnerId, */
         ]);
 
         if (!$checkProject->fetch()) {
@@ -185,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($isEditing) {
             $params['id'] = $id;
-            $params['owner_id'] = $demoOwnerId;
+            $params['owner_id'] = $currentUserId; /* $demoOwnerId; */
 
             $sql = "
                 UPDATE tasks t

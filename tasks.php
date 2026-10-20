@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/config/functions.php';
@@ -7,7 +6,9 @@ require_once __DIR__ . '/config/database.php';
 
 // Identificador temporal para las pruebas.
 // Se sustituirá por el usuario autenticado cuando implementemos el login.
-$demoOwnerId = 1;
+/* $demoOwnerId = 1; */
+
+$currentUserId = requireLogin();
 
 $statusLabels = [
     'pending' => 'Pendiente',
@@ -50,7 +51,7 @@ $sql = "
 ";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute(['owner_id' => $demoOwnerId]);
+$stmt->execute(['owner_id' => $currentUserId]); /* $demoOwnerId */
 $tasks = $stmt->fetchAll();
 
 $flashMessage = $_SESSION['flash_message'] ?? null;
@@ -81,7 +82,7 @@ unset($_SESSION['flash_message']);
     </header>
 
     <nav class="page-navigation">
-        <a href="index.html">Dashboard</a>
+        <a href="index.php">Dashboard</a>
         <a href="projects.php">Proyectos</a>
         <a href="tasks.php" aria-current="page">Tareas</a>
     </nav>

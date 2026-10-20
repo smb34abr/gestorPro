@@ -5,7 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/config/functions.php';
 require_once __DIR__ . '/config/database.php';
 
-$demoOwnerId = 1;
+/* $demoOwnerId = 1; */
+$currentUserId = requireLogin();
 
 $statuses = [
     'planning' => 'Planificación',
@@ -37,7 +38,7 @@ if ($isEditing) {
 
     $stmt->execute([
         'id' => $id,
-        'owner_id' => $demoOwnerId,
+        'owner_id' => $currentUserId, /* $demoOwnerId, */
     ]);
 
     $existingProject = $stmt->fetch();
@@ -124,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'start_date' => $startDate !== '' ? $startDate : null,
                 'due_date' => $dueDate !== '' ? $dueDate : null,
                 'id' => $id,
-                'owner_id' => $demoOwnerId,
+                'owner_id' => $currentUserId, /* $demoOwnerId, */
             ]);
 
             $_SESSION['flash_message'] = 'Proyecto actualizado correctamente.';
@@ -137,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare($sql);
 
             $stmt->execute([
-                'owner_id' => $demoOwnerId,
+                'owner_id' => $currentUserId, /* $demoOwnerId, */
                 'name' => $name,
                 'description' => $description !== '' ? $description : null,
                 'status' => $status,

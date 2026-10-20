@@ -1117,3 +1117,51 @@ tbody tr:hover {
         flex: 1;
     }
 }
+
+
+/* Autenticación: inicio de sesión y registro */
+
+.auth-panel {
+    width: 100%;
+    max-width: 460px;
+    margin: 40px auto;
+    box-sizing: border-box;
+}
+
+.auth-panel h1 {
+    margin-bottom: 8px;
+    color: #171b2e;
+}
+
+.auth-panel > p {
+    color: #73788c;
+    line-height: 1.6;
+}
+
+.auth-panel form {
+    margin-top: 28px;
+}
+
+.auth-panel form > .button-primary {
+    width: 100%;
+}
+
+.auth-panel > p:last-child {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.auth-panel a {
+    color: #5b5bd6;
+    font-weight: 600;
+}
+
+.auth-panel small {
+    color: #73788c;
+}
+
+@media (max-width: 520px) {
+    .auth-panel {
+        margin: 16px auto;
+    }
+}

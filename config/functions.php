@@ -57,3 +57,73 @@ function redirect(string $url): never
     header('Location: ' . $url);
     exit;
 }
+
+
+/**
+ * Comprueba si existe una sesión autenticada.
+ */
+function isLoggedIn(): bool
+{
+    return isset($_SESSION['user_id'])
+        && is_int($_SESSION['user_id'])
+        && $_SESSION['user_id'] > 0;
+}
+
+/**
+ * Exige que el usuario haya iniciado sesión.
+ * Devuelve el ID del usuario autenticado.
+ */
+function requireLogin(): int
+{
+    if (!isLoggedIn()) {
+        redirect('login.php');
+    }
+
+    return $_SESSION['user_id'];
+}
+
+/**
+ * Impide que un usuario autenticado vuelva
+ * a las páginas de acceso o registro.
+ */
+function requireGuest(): void
+{
+    if (isLoggedIn()) {
+        redirect('index.php');
+    }
+}
+
+/**
+ * Regenera la sesión al autenticar al usuario.
+ */
+function loginUser(array $user): void
+{
+    session_regenerate_id(true);
+
+    $_SESSION['user_id'] = (int) $user['id'];
+    $_SESSION['user_name'] = (string) $user['name'];
+    $_SESSION['user_role'] = (string) $user['role'];
+}
+
+/**
+ * Destruye la sesión actual.
+ */
+function logoutUser(): void
+{
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+
+        setcookie(session_name(), '', [
+            'expires' => time() - 42000,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => 'Lax',
+        ]);
+    }
+
+    session_destroy();
+}

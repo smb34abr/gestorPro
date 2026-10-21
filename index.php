@@ -1,7 +1,103 @@
 <?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/config/functions.php';
+require_once __DIR__ . '/config/database.php';
+
+$currentUserId = requireLogin();
+
+// 1. Resumen de proyectos del usuario autenticado.
+$projectStatsStmt = $pdo->prepare("
+    SELECT
+        COUNT(*) AS total_projects,
+        COALESCE(SUM(status = 'active'), 0) AS active_projects,
+        COALESCE(SUM(status = 'completed'), 0) AS completed_projects
+    FROM projects
+    WHERE owner_id = :owner_id
+");
+
+$projectStatsStmt->execute([
+  'owner_id' => $currentUserId,
+]);
+
+$projectStats = $projectStatsStmt->fetch();
+
+// 2. Resumen de tareas pertenecientes a sus proyectos.
+$taskStatsStmt = $pdo->prepare("
+    SELECT
+        COUNT(*) AS total_tasks,
+        COALESCE(SUM(t.status = 'pending'), 0) AS pending_tasks,
+        COALESCE(SUM(t.status = 'in_progress'), 0) AS in_progress_tasks,
+        COALESCE(SUM(t.status = 'completed'), 0) AS completed_tasks,
+        COALESCE(SUM(
+            t.due_date IS NOT NULL
+            AND t.due_date >= CURDATE()
+            AND t.due_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+            AND t.status IN ('pending', 'in_progress')
+        ), 0) AS upcoming_tasks
+    FROM tasks t
+    INNER JOIN projects p ON p.id = t.project_id
+    WHERE p.owner_id = :owner_id
+");
+
+$taskStatsStmt->execute([
+  'owner_id' => $currentUserId,
+]);
+
+$taskStats = $taskStatsStmt->fetch();
+
+// 3. Proyectos recientes con el número de tareas de cada uno.
+$recentProjectsStmt = $pdo->prepare("
+    SELECT
+        p.id,
+        p.name,
+        p.status,
+        p.due_date,
+        (
+            SELECT COUNT(*)
+            FROM tasks t
+            WHERE t.project_id = p.id
+        ) AS total_tasks,
+        (
+            SELECT COUNT(*)
+            FROM tasks t
+            WHERE t.project_id = p.id
+              AND t.status = 'completed'
+        ) AS completed_tasks
+    FROM projects p
+    WHERE p.owner_id = :owner_id
+    ORDER BY p.updated_at DESC, p.id DESC
+    LIMIT 5
+");
+
+$recentProjectsStmt->execute([
+  'owner_id' => $currentUserId,
+]);
+
+$recentProjects = $recentProjectsStmt->fetchAll();
+
+// 4. Etiquetas legibles para mostrar los estados.
+$projectStatusLabels = [
+  'planning' => 'En planificación',
+  'active' => 'Activo',
+  'on_hold' => 'En pausa',
+  'completed' => 'Completado',
+  'archived' => 'Archivado',
+];
+
+$flashMessage = $_SESSION['flash_message'] ?? null;
+unset($_SESSION['flash_message']);
+?>
+
+
+
+
+<?php
+/*
   declare(strict_types=1);
   require_once __DIR__ . '/config/functions.php';
-  $currentUserId = requireLogin();
+  $currentUserId = requireLogin(); 
+ */
 ?>
 
 <!DOCTYPE html>
@@ -67,14 +163,14 @@
           Bienvenido,
           <?= e($_SESSION['user_name'] ?? 'Usuario') ?>
         </p>
-        
+
         <form action="logout.php" method="POST">
           <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
           <button type="submit" class="button-secondary">
             Cerrar sesión
           </button>
         </form>
-         <!-- fin -->
+        <!-- fin -->
 
       </header>
 
@@ -95,37 +191,38 @@
         <section class="stats-grid" aria-label="Indicadores">
           <article class="stat-card">
             <div class="stat-top">
-              <span>Proyectos activos</span>
+              <span>Total de proyectos</span>
               <span class="stat-icon purple">▣</span>
             </div>
-            <p class="stat-number">08</p>
-            <span class="stat-note">Proyectos en seguimiento</span>
+            <p class="stat-number"><?= (int) $projectStats['total_projects'] ?></p>
+            <span class="stat-note">Proyectos registrados</span>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Proyectos activos</span>
+              <span class="stat-icon orange">◷</span>
+            </div>
+            <p class="stat-number"><?= (int) $projectStats['active_projects'] ?></p>
+            <span class="stat-note">En ejecución</span>
           </article>
 
           <article class="stat-card">
             <div class="stat-top">
               <span>Tareas pendientes</span>
-              <span class="stat-icon orange">◷</span>
-            </div>
-            <p class="stat-number">24</p>
-            <span class="stat-note">Requieren atención</span>
-          </article>
-
-          <article class="stat-card">
-            <div class="stat-top">
-              <span>Tareas completadas</span>
-              <span class="stat-icon green">✓</span>
-            </div>
-            <p class="stat-number">56</p>
-            <span class="stat-note">Finalizadas en el periodo</span>
-          </article>
-
-          <article class="stat-card">
-            <div class="stat-top">
-              <span>Progreso general</span>
               <span class="stat-icon blue">↗</span>
             </div>
-            <p class="stat-number">72%</p>
+            <p class="stat-number"><?= (int) $taskStats['pending_tasks'] ?></p>
+            <span class="stat-note">Por comenzar</span>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Tareas completadas</span>              
+              <span class="stat-icon green">✓</span>
+            </div>
+            <p class="stat-number"><?= (int) $taskStats['completed_tasks'] ?></p>
+            <span class="stat-note">Finalizadas</span>
             <div class="progress-track">
               <div class="progress-fill" style="width:72%"></div>
             </div>

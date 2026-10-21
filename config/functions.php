@@ -1,10 +1,36 @@
 <?php
-
 declare(strict_types=1);
 
+// Configuración segura de las sesiones.
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
+    // Evita aceptar identificadores de sesión no inicializados por el servidor.
+    ini_set('session.use_strict_mode', '1');
+
+    // Evita transportar el identificador de sesión mediante URL.
+    ini_set('session.use_only_cookies', '1');
+
+    $isHttps = isset($_SERVER['HTTPS'])
+        && $_SERVER['HTTPS'] !== ''
+        && strtolower((string) $_SERVER['HTTPS']) !== 'off';
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+
+    session_start();    
 }
+
+// Encabezados básicos de seguridad HTTP.
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+}
+
 
 /**
  * Escapa texto antes de insertarlo en HTML.
@@ -93,14 +119,40 @@ function requireGuest(): void
     }
 }
 
+
 /**
- * Regenera la sesión al autenticar al usuario.
+ * Regenera la sesión y actualiza los datos de autenticación.
  */
 function loginUser(array $user): void
 {
-    session_regenerate_id(true);
+    if (!isset($user['id'], $user['name'], $user['role'])) {
+        throw new InvalidArgumentException(
+            'Faltan datos del usuario para iniciar sesión.'
+        );
+    }
 
-    $_SESSION['user_id'] = (int) $user['id'];
+    $userId = filter_var(
+        $user['id'],
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($userId === false) {
+        throw new InvalidArgumentException(
+            'El identificador del usuario no es válido.'
+        );
+    }
+
+    if (!session_regenerate_id(true)) {
+        throw new RuntimeException(
+            'No fue posible renovar la sesión.'
+        );
+    }
+
+    // Renovar el token CSRF después de autenticar.
+    unset($_SESSION['csrf_token']);
+
+    $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = (string) $user['name'];
     $_SESSION['user_role'] = (string) $user['role'];
 }

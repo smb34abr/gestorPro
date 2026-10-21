@@ -1165,3 +1165,66 @@ tbody tr:hover {
         margin: 16px auto;
     }
 }
+
+
+/* Búsqueda, filtros y paginación de tareas */
+
+.filters-panel {
+    margin-bottom: 24px;
+}
+
+.task-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 20px;
+}
+
+.task-filters .form-group {
+    margin-bottom: 16px;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 16px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid #eef0f5;
+}
+
+.pagination-info {
+    color: #73788c;
+    font-size: 0.9rem;
+}
+
+.pagination-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@media (max-width: 650px) {
+    .task-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pagination {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
